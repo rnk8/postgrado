@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Cache;
 
 class CertificacionController extends BaseController
 {
@@ -25,8 +26,13 @@ class CertificacionController extends BaseController
     {
         $this->authorize('ver_certificaciones');
 
+        $gestionActual = Cache::get('gestion_actual');
         $query = Certificacion::with(['programa', 'gestion']);
         
+        if ($gestionActual) {
+            $query->where('gestion_id', $gestionActual->id);
+        }
+
         if ($busqueda = $request->get('search')) {
             $query->where('nombre_est', 'like', "%{$busqueda}%")
                   ->orWhere('nro_registro_est', 'like', "%{$busqueda}%")
@@ -42,7 +48,10 @@ class CertificacionController extends BaseController
         }
 
         $certificaciones = $query->latest()->paginate(15)->withQueryString();
-        $programas = Programa::select('id', 'nombre_carrera')->get();
+        
+        $programas = $gestionActual 
+            ? Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get()
+            : collect();
 
         return Inertia::render('Certificaciones/Index', [
             'certificaciones' => $certificaciones,
@@ -70,10 +79,14 @@ class CertificacionController extends BaseController
     {
         $this->authorize('crear_certificaciones');
         
-        $programas = Programa::select('id', 'nombre_carrera')->get();
+        $gestionActual = Cache::get('gestion_actual');
+        $programas = $gestionActual
+            ? Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get()
+            : collect();
         
         return Inertia::render('Certificaciones/Create', [
             'programas' => $programas,
+            'gestionActiva' => (bool)$gestionActual,
             'estadosDisponibles' => [
                 'pendiente' => 'Pendiente',
                 'emitido' => 'Emitido',
@@ -84,7 +97,10 @@ class CertificacionController extends BaseController
 
     public function store(StoreCertificacionRequest $request)
     {
-        $gestionActual = $this->gestionService->obtenerGestionActual();
+        $gestionActual = Cache::get('gestion_actual');
+        if (!$gestionActual) {
+            return back()->with('error', 'No hay una gestión académica activa. No se puede crear la certificación.');
+        }
         
         // Generar número automático
         $year = now()->year;
@@ -94,7 +110,7 @@ class CertificacionController extends BaseController
         $certificacion = Certificacion::create([
             ...$request->validated(),
             'numero' => $numero,
-            'gestion_id' => $gestionActual?->id
+            'gestion_id' => $gestionActual->id
         ]);
         
         $certificacion->calcularPromedio();
@@ -118,11 +134,15 @@ class CertificacionController extends BaseController
     {
         $this->authorize('editar_certificaciones');
         
-        $programas = Programa::select('id', 'nombre_carrera')->get();
+        $gestionActual = Cache::get('gestion_actual');
+        $programas = $gestionActual
+            ? Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get()
+            : collect([$certificacion->programa])->filter();
         
         return Inertia::render('Certificaciones/Edit', [
             'certificacion' => $certificacion,
             'programas' => $programas,
+            'gestionActiva' => (bool)$gestionActual,
             'estadosDisponibles' => [
                 'pendiente' => 'Pendiente',
                 'emitido' => 'Emitido',

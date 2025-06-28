@@ -1,8 +1,8 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import HIcon from '@/Components/HIcon.vue';
 
 const props = defineProps({
@@ -12,7 +12,11 @@ const props = defineProps({
   filters: Object,
   estadosDisponibles: Object,
   permisos: Object,
+  gestionActiva: Boolean,
 });
+
+const page = usePage();
+const gestionActiva = computed(() => page.props.system.gestion_actual);
 
 // Renombrar para evitar conflictos
 const tesisList = props.tesis;
@@ -130,7 +134,18 @@ function eliminarTesis(tesis) {
         <div class="card-body">
           <h2 class="card-title">Lista de Tesis</h2>
           
-          <div class="overflow-x-auto">
+          <!-- Alerta de Gestión No Activa -->
+          <div v-if="!gestionActiva" role="alert" class="alert alert-warning">
+              <HIcon name="ExclamationTriangleIcon" class="h-6 w-6" />
+              <div>
+                  <h3 class="font-bold">No hay una gestión académica activa.</h3>
+                  <div class="text-xs">Para ver, crear o administrar tesis, primero debe
+                      <Link :href="route('gestiones.index')" class="link link-primary">activar una gestión</Link>.
+                  </div>
+              </div>
+          </div>
+
+          <div v-else class="overflow-x-auto">
             <table class="table">
               <thead>
                 <tr>
@@ -207,14 +222,19 @@ function eliminarTesis(tesis) {
                   </td>
                 </tr>
                 <tr v-if="tesisList.data.length === 0">
-                  <td colspan="6" class="text-center py-4">No se encontraron tesis.</td>
+                  <td colspan="6" class="text-center py-8">
+                    <div class="text-lg">No se encontraron tesis.</div>
+                    <div class="text-base-content/60">
+                        No hay tesis registradas para la gestión actual ({{ gestionActiva.nombre }}) o que coincidan con su búsqueda.
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <!-- Paginación -->
-          <Pagination :links="tesisList.links" />
+          <Pagination v-if="gestionActiva && tesisList.data.length > 0" :links="tesisList.links" />
         </div>
       </div>
     </div>

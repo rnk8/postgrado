@@ -11,6 +11,8 @@ use Inertia\Inertia;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use App\Models\Gestion;
+use Illuminate\Support\Facades\Cache;
 
 class DocenteController extends BaseController
 {
@@ -24,10 +26,18 @@ class DocenteController extends BaseController
     {
         $this->authorize('ver_docentes');
 
+        $gestionActual = Cache::get('gestion_actual');
         $query = Docente::query();
+
+        if ($gestionActual) {
+            $query->where('gestion_id', $gestionActual->id);
+        }
+
         if ($busqueda = $request->get('search')) {
-            $query->where('nombre_doc', 'like', "%{$busqueda}%")
+            $query->where(function($q) use ($busqueda) {
+                $q->where('nombre_doc', 'like', "%{$busqueda}%")
                   ->orWhere('cod_doc', 'like', "%{$busqueda}%");
+            });
         }
 
         $docentes = $query->latest()->paginate(10)->withQueryString();
@@ -51,9 +61,14 @@ class DocenteController extends BaseController
 
     public function store(StoreDocenteRequest $request)
     {
-        $gestionActual = $this->gestionService->obtenerGestionActual();
-        Docente::create([...$request->validated(), 'gestion_id' => $gestionActual?->id]);
-        return redirect()->route('docentes.index')->with('success', 'Docente creado correctamente');
+        $gestionActual = Cache::get('gestion_actual');
+        if (!$gestionActual) {
+            return back()->with('error', 'No hay una gestión académica activa. No se puede crear el docente.');
+        }
+
+        Docente::create([...$request->validated(), 'gestion_id' => $gestionActual->id]);
+
+        return redirect()->route('docentes.index')->with('success', 'Docente creado correctamente.');
     }
 
     public function edit(Docente $docente)

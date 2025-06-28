@@ -1,8 +1,8 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import HIcon from '@/Components/HIcon.vue';
-import { ref, watch } from 'vue';
-import { router, Link } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
+import { router, Link, usePage } from '@inertiajs/vue3';
 import { throttle } from 'lodash';
 import Pagination from '@/Components/Pagination.vue';
 
@@ -11,6 +11,9 @@ const props = defineProps({
     filters: Object,
     permisos: Object,
 });
+
+const page = usePage();
+const gestionActiva = computed(() => page.props.system.gestion_actual);
 
 const search = ref(props.filters.search || '');
 
@@ -95,7 +98,18 @@ function eliminarDocente(docente) {
                 <div class="card-body">
                     <h2 class="card-title">Lista de Docentes</h2>
                     
-                    <div class="overflow-x-auto">
+                    <!-- Alerta de Gestión No Activa -->
+                    <div v-if="!gestionActiva" role="alert" class="alert alert-warning">
+                        <HIcon name="ExclamationTriangleIcon" class="h-6 w-6" />
+                        <div>
+                            <h3 class="font-bold">No hay una gestión académica activa.</h3>
+                            <div class="text-xs">Para ver, crear o administrar docentes, primero debe
+                                <Link :href="route('gestiones.index')" class="link link-primary">activar una gestión</Link>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="overflow-x-auto">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -162,12 +176,20 @@ function eliminarDocente(docente) {
                                         </div>
                                     </td>
                                 </tr>
+                                <tr v-if="docentes.data.length === 0">
+                                    <td colspan="4" class="text-center py-8">
+                                        <div class="text-lg">No se encontraron docentes.</div>
+                                        <div class="text-base-content/60">
+                                            No hay docentes registrados para la gestión actual ({{ gestionActiva.nombre }}) o que coincidan con su búsqueda.
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Paginación -->
-                    <Pagination :links="docentes.links" />
+                    <Pagination v-if="gestionActiva && docentes.data.length > 0" :links="docentes.links" />
                 </div>
             </div>
         </div>

@@ -13,6 +13,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DatosAcademicosImport;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class ExcelController extends BaseController
 {
@@ -25,8 +26,13 @@ class ExcelController extends BaseController
     public function index(Request $request)
     {
         $this->authorize('cargar_excel');
-
+        
+        $gestionActual = Cache::get('gestion_actual');
         $query = CargaExcel::with(['user', 'gestion']);
+
+        if ($gestionActual) {
+            $query->where('gestion_id', $gestionActual->id);
+        }
         
         if ($busqueda = $request->get('search')) {
             $query->where(function($q) use ($busqueda) {
@@ -41,12 +47,14 @@ class ExcelController extends BaseController
 
         $cargas = $query->latest()->paginate(15)->withQueryString();
 
-        // Estadísticas generales
+        // Estadísticas contextuales a la gestión actual si existe
+        $statsQuery = $gestionActual ? CargaExcel::where('gestion_id', $gestionActual->id) : CargaExcel::query();
+        
         $estadisticas = [
-            'total_cargas' => CargaExcel::count(),
-            'cargas_exitosas' => CargaExcel::where('estado', 'completado')->count(),
-            'cargas_error' => CargaExcel::where('estado', 'error')->count(),
-            'registros_procesados' => CargaExcel::sum('registros_procesados'),
+            'total_cargas' => $statsQuery->clone()->count(),
+            'cargas_exitosas' => $statsQuery->clone()->where('estado', 'completado')->count(),
+            'cargas_error' => $statsQuery->clone()->where('estado', 'error')->count(),
+            'registros_procesados' => $statsQuery->clone()->sum('registros_procesados'),
         ];
 
         return Inertia::render('Excel/Index', [
@@ -74,6 +82,11 @@ class ExcelController extends BaseController
     {
         $this->authorize('cargar_excel');
 
+        $gestionActual = Cache::get('gestion_actual');
+        if (!$gestionActual) {
+            return back()->with('error', 'No hay una gestión académica activa. No se puede subir el archivo.');
+        }
+
         $request->validate([
             'archivo' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
             'descripcion' => 'nullable|string|max:500',
@@ -98,7 +111,7 @@ class ExcelController extends BaseController
                 'descripcion' => $request->input('descripcion'),
                 'estado' => 'pendiente',
                 'user_id' => $request->user()->id,
-                'gestion_id' => $this->gestionService->obtenerGestionActual()?->id,
+                'gestion_id' => $gestionActual->id,
             ]);
 
             return redirect()->route('excel.index')

@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\GestionService;
 use App\Models\PageVisit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Controlador principal del Dashboard
@@ -54,58 +55,47 @@ class DashboardController extends BaseController
         // Verificar que el usuario tenga permisos para ver reportes/dashboard
         $this->authorize('ver_reportes');
         
-        // Obtener la gestión académica actual usando el service
-        $gestionActual = $this->gestionService->obtenerGestionActual();
+        // Obtener la gestión académica actual desde la caché global
+        $gestionActual = Cache::get('gestion_actual');
         
-        // Si no hay gestión activa, redirigir a gestiones con advertencia
-        if (!$gestionActual) {
-            return redirect()->route('gestiones.index')
-                ->with('warning', 'No hay una gestión académica activa. Configure una gestión antes de continuar.');
+        // Si no hay gestión activa, aún podemos mostrar el Dashboard pero con una advertencia.
+        // Las estadísticas específicas de la gestión estarán vacías.
+        
+        $estadisticas = [];
+        $tesis_por_estado = [];
+        $ultimas_tesis = [];
+
+        if ($gestionActual) {
+            $estadisticas = [
+                'total_docentes' => Docente::where('gestion_id', $gestionActual->id)->count(),
+                'total_programas' => Programa::where('gestion_id', $gestionActual->id)->count(),
+                'total_tesis' => Tesis::where('gestion_id', $gestionActual->id)->count(),
+                'total_certificaciones' => Certificacion::where('gestion_id', $gestionActual->id)->count(),
+            ];
+
+            $tesis_por_estado = Tesis::where('gestion_id', $gestionActual->id)
+                ->select('estado', DB::raw('count(*) as total'))
+                ->groupBy('estado')
+                ->pluck('total', 'estado');
+
+            $ultimas_tesis = Tesis::with(['programa', 'tutor'])
+                ->where('gestion_id', $gestionActual->id)
+                ->latest()
+                ->take(5)
+                ->get();
         }
-        
-        // Obtener estadísticas completas de la gestión actual
-        $estadisticasGestion = $this->gestionService->obtenerEstadisticasGestion($gestionActual);
-        
-        // Obtener estadísticas principales para las tarjetas del dashboard
-        $estadisticasPrincipales = $this->obtenerEstadisticasPrincipales($gestionActual);
-        
-        // Obtener datos para gráficos y visualizaciones
-        $datosGraficos = $this->obtenerDatosGraficos($gestionActual);
-        
-        // Obtener actividad reciente del sistema
-        $actividadReciente = $this->obtenerActividadReciente($gestionActual);
-        
-        // Obtener resumen general del sistema
-        $resumenSistema = $this->obtenerResumenSistema();
-
-        $estadisticas = [
-            'total_docentes' => Docente::count(),
-            'total_programas' => Programa::count(),
-            'total_tesis' => Tesis::count(),
-            'total_certificaciones' => Certificacion::count(),
-        ];
-
-        $tesis_por_estado = Tesis::select('estado', DB::raw('count(*) as total'))
-            ->groupBy('estado')
-            ->pluck('total', 'estado');
 
         $paginas_mas_visitadas = PageVisit::select('route', 'visitas')
             ->orderByDesc('visitas')
             ->take(5)
             ->get();
 
-        $ultimas_tesis = Tesis::with(['programa', 'tutor'])
-            ->latest()
-            ->take(5)
-            ->get();
-
         return Inertia::render('Dashboard/Index', [
-            'gestionActual' => $gestionActual,
-            'estadisticas' => $estadisticasPrincipales,
-            'estadisticasDetalladas' => $estadisticasGestion,
-            'graficos' => $datosGraficos,
-            'actividadReciente' => $actividadReciente,
-            'resumenSistema' => $resumenSistema,
+            'gestionActual' => $gestionActual, // Se pasa para mostrar el nombre y la advertencia
+            'estadisticas' => $estadisticas,
+            'tesis_por_estado' => $tesis_por_estado,
+            'paginas_mas_visitadas' => $paginas_mas_visitadas,
+            'ultimas_tesis' => $ultimas_tesis,
             'permisos' => [
                 'puede_ver_reportes' => $request->user()->can('ver_reportes'),
                 'puede_generar_reportes' => $request->user()->can('generar_reportes'),
@@ -113,10 +103,6 @@ class DashboardController extends BaseController
                 'puede_crear_gestiones' => $request->user()->can('crear_gestiones'),
                 'puede_cargar_excel' => $request->user()->can('cargar_excel'),
             ],
-            'estadisticas' => $estadisticas,
-            'tesis_por_estado' => $tesis_por_estado,
-            'paginas_mas_visitadas' => $paginas_mas_visitadas,
-            'ultimas_tesis' => $ultimas_tesis,
         ]);
     }
     

@@ -1,8 +1,8 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import HIcon from '@/Components/HIcon.vue';
 
 const props = defineProps({
@@ -10,6 +10,9 @@ const props = defineProps({
     filters: Object,
     permisos: Object,
 });
+
+const page = usePage();
+const gestionActiva = computed(() => page.props.system.gestion_actual);
 
 const search = ref(props.filters?.search || '');
 
@@ -75,7 +78,18 @@ function eliminarPrograma(programa) {
                 <div class="card-body">
                     <h2 class="card-title">Lista de Programas</h2>
                     
-                    <div class="overflow-x-auto">
+                    <!-- Alerta de Gestión No Activa -->
+                    <div v-if="!gestionActiva" role="alert" class="alert alert-warning">
+                        <HIcon name="ExclamationTriangleIcon" class="h-6 w-6" />
+                        <div>
+                            <h3 class="font-bold">No hay una gestión académica activa.</h3>
+                            <div class="text-xs">Para ver, crear o administrar programas, primero debe
+                                <Link :href="route('gestiones.index')" class="link link-primary">activar una gestión</Link>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="overflow-x-auto">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -158,12 +172,20 @@ function eliminarPrograma(programa) {
                                         </div>
                                     </td>
                                 </tr>
+                                <tr v-if="programas.data.length === 0">
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="text-lg">No se encontraron programas.</div>
+                                        <div class="text-base-content/60">
+                                            No hay programas registrados para la gestión actual ({{ gestionActiva.nombre }}) o que coincidan con su búsqueda.
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Paginación -->
-                    <Pagination :links="programas.links" />
+                    <Pagination v-if="gestionActiva && programas.data.length > 0" :links="programas.links" />
                 </div>
             </div>
         </div>

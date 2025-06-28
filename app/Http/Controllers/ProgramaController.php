@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Cache;
 
 class ProgramaController extends BaseController
 {
@@ -22,12 +23,23 @@ class ProgramaController extends BaseController
     public function index(Request $request)
     {
         $this->authorize('ver_programas');
+        
+        $gestionActual = Cache::get('gestion_actual');
         $query = Programa::with('coordinador');
-        if ($buscar = $request->get('search')) {
-            $query->where('nombre_carrera', 'like', "%{$buscar}%")
-                  ->orWhere('cod_carrera', 'like', "%{$buscar}%");
+
+        if ($gestionActual) {
+            $query->where('gestion_id', $gestionActual->id);
         }
+
+        if ($buscar = $request->get('search')) {
+            $query->where(function($q) use ($buscar) {
+                $q->where('nombre_carrera', 'like', "%{$buscar}%")
+                  ->orWhere('cod_carrera', 'like', "%{$buscar}%");
+            });
+        }
+
         $programas = $query->latest()->paginate(10)->withQueryString();
+
         return Inertia::render('Programas/Index', [
             'programas' => $programas,
             'filters' => ['search' => $buscar],
@@ -42,26 +54,43 @@ class ProgramaController extends BaseController
     public function create()
     {
         $this->authorize('crear_programas');
-        $docentes = Docente::where('estado', 'activo')->orderBy('nombre_doc')->get(['id', 'nombre_doc']);
+        
+        $gestionActual = Cache::get('gestion_actual');
+        $docentes = $gestionActual 
+            ? Docente::where('gestion_id', $gestionActual->id)->where('estado', 'activo')->orderBy('nombre_doc')->get(['id', 'nombre_doc'])
+            : collect();
+
         return Inertia::render('Programas/Create', [
             'docentes' => $docentes,
+            'gestionActiva' => (bool)$gestionActual,
         ]);
     }
 
     public function store(StoreProgramaRequest $request)
     {
-        $gestion = $this->gestionService->obtenerGestionActual();
-        Programa::create([...$request->validated(), 'gestion_id' => $gestion?->id]);
-        return redirect()->route('programas.index')->with('success','Programa creado');
+        $gestionActual = Cache::get('gestion_actual');
+        if (!$gestionActual) {
+            return back()->with('error', 'No hay una gestión académica activa. No se puede crear el programa.');
+        }
+
+        Programa::create([...$request->validated(), 'gestion_id' => $gestionActual->id]);
+
+        return redirect()->route('programas.index')->with('success', 'Programa creado correctamente.');
     }
 
     public function edit(Programa $programa)
     {
         $this->authorize('editar_programas');
-        $docentes = Docente::where('estado', 'activo')->orderBy('nombre_doc')->get(['id', 'nombre_doc']);
+
+        $gestionActual = Cache::get('gestion_actual');
+        $docentes = $gestionActual 
+            ? Docente::where('gestion_id', $gestionActual->id)->where('estado', 'activo')->orderBy('nombre_doc')->get(['id', 'nombre_doc'])
+            : collect([$programa->coordinador])->filter();
+
         return Inertia::render('Programas/Edit',[
             'programa' => $programa,
             'docentes' => $docentes,
+            'gestionActiva' => (bool)$gestionActual,
         ]);
     }
 

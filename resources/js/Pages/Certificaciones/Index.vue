@@ -1,9 +1,10 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, watch } from 'vue';
-import { router, Link } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
+import { router, Link, usePage } from '@inertiajs/vue3';
 import { throttle } from 'lodash';
 import Pagination from '@/Components/Pagination.vue';
+import HIcon from '@/Components/HIcon.vue';
 
 const props = defineProps({
   certificaciones: Object,
@@ -11,6 +12,9 @@ const props = defineProps({
   filters: Object,
   estadosDisponibles: Object,
 });
+
+const page = usePage();
+const gestionActiva = computed(() => page.props.system.gestion_actual);
 
 const filters = ref({
   search: props.filters.search || '',
@@ -47,12 +51,24 @@ watch(filters, throttle(() => {
             </select>
         </div>
         <Link :href="route('certificaciones.create')" class="btn btn-primary">
+          <HIcon name="PlusIcon" class="h-5 w-5" />
           Nueva Certificación
         </Link>
       </div>
 
+      <!-- Alerta de Gestión No Activa -->
+      <div v-if="!gestionActiva" role="alert" class="alert alert-warning mb-6">
+          <HIcon name="ExclamationTriangleIcon" class="h-6 w-6" />
+          <div>
+              <h3 class="font-bold">No hay una gestión académica activa.</h3>
+              <div class="text-xs">Para ver, crear o administrar certificaciones, primero debe
+                  <Link :href="route('gestiones.index')" class="link link-primary">activar una gestión</Link>.
+              </div>
+          </div>
+      </div>
+
       <!-- Tabla de Certificaciones -->
-      <div class="overflow-x-auto">
+      <div v-else class="overflow-x-auto">
         <table class="table table-zebra w-full">
           <thead>
             <tr>
@@ -89,14 +105,19 @@ watch(filters, throttle(() => {
               </td>
             </tr>
              <tr v-if="certificaciones.data.length === 0">
-                <td colspan="7" class="text-center py-4">No se encontraron certificaciones.</td>
+                <td colspan="7" class="text-center py-8">
+                    <div class="text-lg">No se encontraron certificaciones.</div>
+                    <div class="text-base-content/60">
+                        No hay certificaciones registradas para la gestión actual ({{ gestionActiva.nombre }}) o que coincidan con su búsqueda.
+                    </div>
+                </td>
             </tr>
           </tbody>
         </table>
       </div>
         
       <!-- Paginación -->
-      <Pagination :links="certificaciones.links" />
+      <Pagination v-if="gestionActiva && certificaciones.data.length > 0" :links="certificaciones.links" />
     </div>
   </AppLayout>
 </template> 

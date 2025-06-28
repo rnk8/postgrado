@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Menu;
+use App\Models\Gestion;
+use Illuminate\Support\Facades\Cache;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -67,6 +69,11 @@ class HandleInertiaRequests extends Middleware
                 'facultad' => 'Facultad de Ciencias Exactas y Tecnología',
                 'direccion' => 'Dirección de Postgrado',
                 'version' => '1.0.0',
+                'gestion_actual' => function () {
+                    return Cache::remember('gestion_actual', now()->addMinutes(60), function () {
+                        return Gestion::where('es_actual', true)->first();
+                    });
+                },
             ],
             
             // Menú dinámico filtrado por roles

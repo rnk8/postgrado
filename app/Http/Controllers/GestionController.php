@@ -13,6 +13,7 @@ use App\Models\Gestion;
 use App\Services\GestionService;
 use App\Http\Requests\StoreGestionRequest;
 use App\Http\Requests\UpdateGestionRequest;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Controlador de Gestiones Académicas
@@ -279,29 +280,36 @@ class GestionController extends BaseController
     }
 
     /**
-     * Activar una gestión como período académico actual
+     * Activar una gestión académica, convirtiéndola en la actual.
      * 
-     * Desactiva automáticamente cualquier otra gestión que esté marcada como actual
-     * y activa la gestión seleccionada
-     * 
-     * @param Gestion $gestion Gestión a activar
+     * Se asegura de que cualquier otra gestión activa sea desactivada.
+     * Limpia la caché de 'gestion_actual' para reflejar el cambio.
+     *
+     * @param Gestion $gestion
      * @return \Illuminate\Http\RedirectResponse
      */
     public function activar(Gestion $gestion)
     {
-        // Verificar que el usuario tenga permisos para activar gestiones
         $this->authorize('activar_gestiones');
 
         try {
-            // Activar usando el service (maneja la lógica de desactivar otras)
-            $this->gestionService->activarGestion($gestion);
+            DB::transaction(function () use ($gestion) {
+                // Desactivar cualquier otra gestión que sea 'actual'
+                Gestion::where('es_actual', true)->update(['es_actual' => false]);
 
-            return redirect()->back()
-                ->with('success', "Gestión '{$gestion->nombre}' activada como período académico actual.");
+                // Activar la nueva gestión
+                $gestion->es_actual = true;
+                $gestion->estado = 'activo';
+                $gestion->save();
                 
+                // Limpiar la caché para que el cambio se refleje en todo el sistema
+                Cache::forget('gestion_actual');
+            });
+            
+            return back()->with('success', "La gestión '{$gestion->nombre}' ahora es la actual.");
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error al activar la gestión: ' . $e->getMessage());
+            Log::error("Error al activar la gestión {$gestion->id}: " . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error al intentar activar la gestión.');
         }
     }
 

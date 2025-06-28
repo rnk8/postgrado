@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Cache;
 
 class TesisController extends BaseController
 {
@@ -26,8 +27,13 @@ class TesisController extends BaseController
     {
         $this->authorize('ver_tesis');
 
+        $gestionActual = Cache::get('gestion_actual');
         $query = Tesis::with(['programa', 'tutor', 'gestion']);
         
+        if ($gestionActual) {
+            $query->where('gestion_id', $gestionActual->id);
+        }
+
         if ($busqueda = $request->get('search')) {
             $query->where('titulo', 'like', "%{$busqueda}%")
                   ->orWhere('nombre_est', 'like', "%{$busqueda}%")
@@ -48,8 +54,14 @@ class TesisController extends BaseController
         }
 
         $tesis = $query->latest()->paginate(15)->withQueryString();
-        $programas = Programa::select('id', 'nombre_carrera')->get();
-        $tutores = Docente::select('id', 'nombre_doc')->get();
+
+        if ($gestionActual) {
+            $programas = Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get();
+            $tutores = Docente::where('gestion_id', $gestionActual->id)->select('id', 'nombre_doc')->get();
+        } else {
+            $programas = collect();
+            $tutores = collect();
+        }
 
         return Inertia::render('Tesis/Index', [
             'tesis' => $tesis,
@@ -72,7 +84,8 @@ class TesisController extends BaseController
                 'puede_editar' => $request->user()->can('editar_tesis'),
                 'puede_eliminar' => $request->user()->can('eliminar_tesis'),
                 'puede_aprobar' => $request->user()->can('aprobar_tesis'),
-            ]
+            ],
+            'gestionActiva' => (bool)$gestionActual
         ]);
     }
 
@@ -80,12 +93,19 @@ class TesisController extends BaseController
     {
         $this->authorize('crear_tesis');
         
-        $programas = Programa::select('id', 'nombre_carrera')->get();
-        $tutores = Docente::select('id', 'nombre_doc')->get();
+        $gestionActual = Cache::get('gestion_actual');
+        if ($gestionActual) {
+            $programas = Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get();
+            $tutores = Docente::where('gestion_id', $gestionActual->id)->select('id', 'nombre_doc')->get();
+        } else {
+            $programas = collect();
+            $tutores = collect();
+        }
         
         return Inertia::render('Tesis/Create', [
             'programas' => $programas,
             'tutores' => $tutores,
+            'gestionActiva' => (bool)$gestionActual,
             'estadosDisponibles' => [
                 'en_desarrollo' => 'En Desarrollo',
                 'defendida' => 'Defendida',
@@ -97,7 +117,10 @@ class TesisController extends BaseController
 
     public function store(StoreTesisRequest $request)
     {
-        $gestionActual = $this->gestionService->obtenerGestionActual();
+        $gestionActual = Cache::get('gestion_actual');
+        if (!$gestionActual) {
+            return back()->with('error', 'No hay una gestión académica activa. No se puede crear la tesis.');
+        }
         
         // Generar código automático
         $year = now()->year;
@@ -107,7 +130,7 @@ class TesisController extends BaseController
         Tesis::create([
             ...$request->validated(),
             'codigo' => $codigo,
-            'gestion_id' => $gestionActual?->id
+            'gestion_id' => $gestionActual->id
         ]);
         
         return redirect()->route('tesis.index')
@@ -129,13 +152,20 @@ class TesisController extends BaseController
     {
         $this->authorize('editar_tesis');
         
-        $programas = Programa::select('id', 'nombre_carrera')->get();
-        $tutores = Docente::select('id', 'nombre_doc')->get();
+        $gestionActual = Cache::get('gestion_actual');
+        if ($gestionActual) {
+            $programas = Programa::where('gestion_id', $gestionActual->id)->select('id', 'nombre_carrera')->get();
+            $tutores = Docente::where('gestion_id', $gestionActual->id)->select('id', 'nombre_doc')->get();
+        } else {
+            $programas = collect([$tesis->programa])->filter();
+            $tutores = collect([$tesis->tutor])->filter();
+        }
         
         return Inertia::render('Tesis/Edit', [
             'tesis' => $tesis,
             'programas' => $programas,
             'tutores' => $tutores,
+            'gestionActiva' => (bool)$gestionActual,
             'estadosDisponibles' => [
                 'en_desarrollo' => 'En Desarrollo',
                 'defendida' => 'Defendida',

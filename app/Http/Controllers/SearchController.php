@@ -11,6 +11,7 @@ use App\Models\Tesis;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Cache;
 
 class SearchController extends BaseController
 {
@@ -28,6 +29,7 @@ class SearchController extends BaseController
 
         $query = $request->input('q', '');
         $isSuggestion = $request->boolean('suggest');
+        $gestionActual = Cache::get('gestion_actual');
 
         // Si no hay término de búsqueda, retornar resultados vacíos
         $results = [
@@ -42,27 +44,45 @@ class SearchController extends BaseController
             // Limitar resultados para sugerencias
             $limit = $isSuggestion ? 3 : 10;
             
+            // Construir consultas base con filtro de gestión si aplica
+            $docentesQuery = $gestionActual ? Docente::where('gestion_id', $gestionActual->id) : Docente::query();
+            $programasQuery = $gestionActual ? Programa::where('gestion_id', $gestionActual->id) : Programa::query();
+            $certificacionesQuery = $gestionActual ? Certificacion::where('gestion_id', $gestionActual->id) : Certificacion::query();
+            $tesisQuery = $gestionActual ? Tesis::where('gestion_id', $gestionActual->id) : Tesis::query();
+
             $results = [
-                'docentes' => Docente::select('id', 'nombre_doc', 'cod_doc')
-                    ->where('nombre_doc', 'like', "%{$query}%")
-                    ->orWhere('cod_doc', 'like', "%{$query}%")
+                'docentes' => $docentesQuery
+                    ->select('id', 'nombre_doc', 'cod_doc')
+                    ->where(function ($q) use ($query) {
+                        $q->where('nombre_doc', 'like', "%{$query}%")
+                          ->orWhere('cod_doc', 'like', "%{$query}%");
+                    })
                     ->limit($limit)
                     ->get(),
-                'programas' => Programa::select('id', 'nombre_carrera', 'cod_carrera')
-                    ->where('nombre_carrera', 'like', "%{$query}%")
-                    ->orWhere('cod_carrera', 'like', "%{$query}%")
+                'programas' => $programasQuery
+                    ->select('id', 'nombre_carrera', 'cod_carrera')
+                    ->where(function ($q) use ($query) {
+                        $q->where('nombre_carrera', 'like', "%{$query}%")
+                          ->orWhere('cod_carrera', 'like', "%{$query}%");
+                    })
                     ->limit($limit)
                     ->get(),
-                'certificaciones' => Certificacion::select('id', 'numero', 'nombre_est', 'nro_registro_est')
-                    ->where('numero', 'like', "%{$query}%")
-                    ->orWhere('nombre_est', 'like', "%{$query}%")
-                    ->orWhere('nro_registro_est', 'like', "%{$query}%")
+                'certificaciones' => $certificacionesQuery
+                    ->select('id', 'numero', 'nombre_est', 'nro_registro_est')
+                    ->where(function ($q) use ($query) {
+                        $q->where('numero', 'like', "%{$query}%")
+                          ->orWhere('nombre_est', 'like', "%{$query}%")
+                          ->orWhere('nro_registro_est', 'like', "%{$query}%");
+                    })
                     ->limit($limit)
                     ->get(),
-                'tesis' => Tesis::select('id', 'titulo', 'codigo', 'nombre_est')
-                    ->where('titulo', 'like', "%{$query}%")
-                    ->orWhere('codigo', 'like', "%{$query}%")
-                    ->orWhere('nombre_est', 'like', "%{$query}%")
+                'tesis' => $tesisQuery
+                    ->select('id', 'titulo', 'codigo', 'nombre_est')
+                    ->where(function ($q) use ($query) {
+                        $q->where('titulo', 'like', "%{$query}%")
+                          ->orWhere('codigo', 'like', "%{$query}%")
+                          ->orWhere('nombre_est', 'like', "%{$query}%");
+                    })
                     ->limit($limit)
                     ->get(),
                 'usuarios' => User::select('id', 'name', 'email')
