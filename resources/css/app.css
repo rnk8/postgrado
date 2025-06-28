@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Rutas que Tailwind debe analizar para purgar clases */
+@source "../**/*.blade.php";
+@source "../**/*.vue";
+@source "../**/*.js";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+
+/* Configuración DaisyUI 5 */
+@plugin "daisyui" {
+  /* cupcake será el tema por defecto y dracula el dark */
+  themes: cupcake --default, dracula --prefersdark, light, corporate;
+}
