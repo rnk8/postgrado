@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\Gestion;
 use App\Services\GestionService;
@@ -93,6 +94,7 @@ class GestionController extends BaseController
 
         return Inertia::render('Gestiones/Create', [
             'estadosDisponibles' => $this->obtenerEstadosDisponibles(),
+            'gestionActual' => $this->gestionService->obtenerGestionActual(),
         ]);
     }
 
@@ -107,19 +109,55 @@ class GestionController extends BaseController
      */
     public function store(StoreGestionRequest $request)
     {
+        Log::info('Intentando crear gestión', [
+            'raw_data' => $request->all(),
+            'user_id' => $request->user()->id
+        ]);
+
         try {
-            // Forzar que toda nueva gestión sea actual y activa
+            // Obtener datos validados
             $data = $request->validated();
-            $data['es_actual'] = true;
-            $data['estado'] = 'activo';
+            
+            Log::info('Datos validados exitosamente', ['validated_data' => $data]);
+            
+            // Si no hay gestión actual, marcar esta como actual automáticamente
+            $gestionActual = $this->gestionService->obtenerGestionActual();
+            if (!$gestionActual) {
+                $data['es_actual'] = true;
+                $data['estado'] = 'activo';
+                Log::info('No hay gestión actual, marcando como actual');
+            }
 
             // Crear la gestión usando el service
             $gestion = $this->gestionService->crearGestion($data);
 
+            $mensaje = $gestion->es_actual 
+                ? "Gestión académica '{$gestion->nombre}' creada exitosamente y establecida como actual."
+                : "Gestión académica '{$gestion->nombre}' creada exitosamente.";
+
+            Log::info('Gestión creada exitosamente', ['gestion_id' => $gestion->id]);
+
             return redirect()->route('gestiones.index')
-                ->with('success', "Gestión académica '{$gestion->nombre}' creada exitosamente.");
+                ->with('success', $mensaje);
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validación', [
+                'errors' => $e->errors(),
+                'data' => $request->all()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors())
+                ->with('error', 'Hay errores en el formulario. Por favor revísalos.');
                 
         } catch (\Exception $e) {
+            Log::error('Error creando gestión: ' . $e->getMessage(), [
+                'data' => $request->all(),
+                'user_id' => $request->user()->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error al crear la gestión: ' . $e->getMessage());
@@ -171,7 +209,15 @@ class GestionController extends BaseController
         $this->authorize('editar_gestiones');
 
         return Inertia::render('Gestiones/Edit', [
-            'gestion' => $gestion,
+            'gestion' => [
+                'id' => $gestion->id,
+                'nombre' => $gestion->nombre,
+                'descripcion' => $gestion->descripcion,
+                'fecha_inicio' => $gestion->fecha_inicio ? $gestion->fecha_inicio->format('Y-m-d') : null,
+                'fecha_fin' => $gestion->fecha_fin ? $gestion->fecha_fin->format('Y-m-d') : null,
+                'estado' => $gestion->estado,
+                'es_actual' => $gestion->es_actual,
+            ],
             'estadosDisponibles' => $this->obtenerEstadosDisponibles(),
         ]);
     }

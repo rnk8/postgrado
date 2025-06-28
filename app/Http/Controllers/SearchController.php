@@ -23,9 +23,11 @@ class SearchController extends BaseController
     {
         $this->validate($request, [
             'q' => 'nullable|string|min:2',
+            'suggest' => 'nullable|boolean',
         ]);
 
         $query = $request->input('q', '');
+        $isSuggestion = $request->boolean('suggest');
 
         // Si no hay término de búsqueda, retornar resultados vacíos
         $results = [
@@ -37,35 +39,38 @@ class SearchController extends BaseController
         ];
 
         if ($query !== '') {
+            // Limitar resultados para sugerencias
+            $limit = $isSuggestion ? 3 : 10;
+            
             $results = [
                 'docentes' => Docente::select('id', 'nombre_doc', 'cod_doc')
                     ->where('nombre_doc', 'like', "%{$query}%")
                     ->orWhere('cod_doc', 'like', "%{$query}%")
-                    ->limit(10)
+                    ->limit($limit)
                     ->get(),
                 'programas' => Programa::select('id', 'nombre_carrera', 'cod_carrera')
                     ->where('nombre_carrera', 'like', "%{$query}%")
                     ->orWhere('cod_carrera', 'like', "%{$query}%")
-                    ->limit(10)
+                    ->limit($limit)
                     ->get(),
                 'certificaciones' => Certificacion::select('id', 'numero', 'nombre_est', 'nro_registro_est')
                     ->where('numero', 'like', "%{$query}%")
                     ->orWhere('nombre_est', 'like', "%{$query}%")
                     ->orWhere('nro_registro_est', 'like', "%{$query}%")
-                    ->limit(10)
+                    ->limit($limit)
                     ->get(),
                 'tesis' => Tesis::select('id', 'titulo', 'codigo', 'nombre_est')
                     ->where('titulo', 'like', "%{$query}%")
                     ->orWhere('codigo', 'like', "%{$query}%")
                     ->orWhere('nombre_est', 'like', "%{$query}%")
-                    ->limit(10)
+                    ->limit($limit)
                     ->get(),
                 'usuarios' => User::select('id', 'name', 'email')
                     ->where(function ($q) use ($query) {
                         $q->where('name', 'like', "%{$query}%")
                           ->orWhere('email', 'like', "%{$query}%");
                     })
-                    ->limit(10)
+                    ->limit($limit)
                     ->get(),
             ];
         }

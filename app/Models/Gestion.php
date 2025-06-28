@@ -79,13 +79,4 @@ class Gestion extends Model
     {
         return self::where('es_actual', true)->first();
     }
-
-    public static function activar($id)
-    {
-        // Desactivar todas las gestiones
-        self::query()->update(['es_actual' => false]);
-        
-        // Activar la gestión seleccionada
-        return self::find($id)->update(['es_actual' => true]);
-    }
 }

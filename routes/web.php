@@ -68,7 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Gestiones académicas
-    Route::resource('gestiones', GestionController::class);
+    Route::resource('gestiones', GestionController::class)->parameters(['gestiones' => 'gestion']);
     Route::put('/gestiones/{gestion}/activar', [GestionController::class, 'activar'])
         ->name('gestiones.activar')
         ->middleware('can:activar_gestiones');
@@ -110,13 +110,16 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('api')->middleware(['auth'])->group(function () {
-    // Búsquedas dinámicas
+    // Búsqueda global con sugerencias
+    Route::get('/search', [SearchController::class, 'index']);
+    
+    // Búsquedas específicas
     Route::get('/search/docentes', function () {
-        // TODO: Implementar búsqueda de docentes
+        // TODO: Implementar búsqueda específica de docentes
     });
     
     Route::get('/search/programas', function () {
-        // TODO: Implementar búsqueda de programas
+        // TODO: Implementar búsqueda específica de programas
     });
     
     // Estadísticas en tiempo real

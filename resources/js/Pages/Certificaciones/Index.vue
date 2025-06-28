@@ -84,7 +84,7 @@ watch(filters, throttle(() => {
                     <Link :href="route('certificaciones.show', cert.id)" class="btn btn-ghost btn-sm join-item">Ver</Link>
                     <Link :href="route('certificaciones.edit', cert.id)" class="btn btn-ghost btn-sm join-item">Editar</Link>
                     <Link v-if="cert.estado === 'pendiente'" :href="route('certificaciones.emitir', cert.id)" method="patch" as="button" class="btn btn-ghost btn-sm join-item text-success">Emitir</Link>
-                    <Link :href="route('certificaciones.destroy', cert.id)" method="delete" as="button" class="btn btn-ghost btn-sm join-item text-red-500" on-before="return confirm('¿Seguro que quieres eliminar esta certificación?')">Eliminar</Link>
+                    <Link :href="route('certificaciones.destroy', cert.id)" method="delete" as="button" class="btn btn-ghost btn-sm join-item text-red-500" :onBefore="() => confirm('¿Seguro que quieres eliminar esta certificación?')">Eliminar</Link>
                 </div>
               </td>
             </tr>

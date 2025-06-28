@@ -23,6 +23,12 @@ class GestionService
     public function crearGestion(array $data): Gestion
     {
         return DB::transaction(function () use ($data) {
+            // Verificar si ya existe una gestión con el mismo nombre
+            $existeGestion = Gestion::where('nombre', $data['nombre'])->exists();
+            if ($existeGestion) {
+                throw new \Exception("Ya existe una gestión con el nombre '{$data['nombre']}'.");
+            }
+
             // Si se marca como actual, desactivar las demás
             if ($data['es_actual'] ?? false) {
                 $this->desactivarTodasLasGestiones();
@@ -261,7 +267,9 @@ class GestionService
             'fecha_fin' => $gestion->fecha_fin,
             'estado' => $gestion->estado,
             'es_actual' => $gestion->es_actual,
-            'duracion_dias' => $gestion->fecha_inicio->diffInDays($gestion->fecha_fin),
+            'duracion_dias' => ($gestion->fecha_inicio && $gestion->fecha_fin)
+                ? $gestion->fecha_inicio->diffInDays($gestion->fecha_fin)
+                : null,
         ];
     }
 

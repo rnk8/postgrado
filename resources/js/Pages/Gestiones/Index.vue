@@ -39,8 +39,14 @@ function formatDate(date) {
 }
 
 function activarGestion(gestion) {
-  if (confirm(`¿Está seguro de activar la gestión "${gestion.nombre}"?`)) {
-    router.put(route('gestiones.activar', gestion.id));
+  if (confirm(`¿Está seguro de activar la gestión "${gestion.nombre}"? Esto la convertirá en el período académico actual.`)) {
+    router.put(route('gestiones.activar', gestion.id), {}, {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        // Opcional: mostrar un toast o notificación no intrusiva
+      }
+    });
   }
 }
 
@@ -158,19 +164,18 @@ function eliminarGestion(gestion) {
                   <th>Nombre</th>
                   <th>Período</th>
                   <th>Estado</th>
-                  <th>Docentes</th>
-                  <th>Programas</th>
-                  <th>Acciones</th>
+                  <th>Docentes / Programas</th>
+                  <th class="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="gestion in gestiones.data" :key="gestion.id" class="hover">
+                <tr v-for="gestion in gestiones.data" :key="gestion.id" class="hover" :class="{'bg-success/5': gestion.es_actual}">
                   <td>
                     <div class="flex items-center gap-3">
                       <div>
                         <div class="font-bold flex items-center gap-2">
-                          {{ gestion.nombre }}
-                          <div v-if="gestion.es_actual" class="badge badge-primary badge-sm">ACTUAL</div>
+                          <span>{{ gestion.nombre }}</span>
+                          <span v-if="gestion.es_actual" class="badge badge-success badge-sm" title="Esta es la gestión académica actual">ACTUAL</span>
                         </div>
                         <div class="text-sm opacity-50">{{ gestion.descripcion }}</div>
                       </div>
@@ -191,44 +196,66 @@ function eliminarGestion(gestion) {
                     </div>
                   </td>
                   <td>
-                    <div class="badge badge-outline">{{ gestion.docentes_count || 0 }}</div>
-                  </td>
-                  <td>
-                    <div class="badge badge-outline">{{ gestion.programas_count || 0 }}</div>
-                  </td>
-                  <td>
-                    <div class="dropdown dropdown-end">
-                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-                        <HIcon name="EllipsisVerticalIcon" class="h-5 w-5" />
-                      </div>
-                      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li>
-                          <Link :href="route('gestiones.show', gestion.id)">
-                            <HIcon name="EyeIcon" class="h-4 w-4" />
-                            Ver Detalles
-                          </Link>
-                        </li>
-                        <li v-if="permisos.puede_editar">
-                          <Link :href="route('gestiones.edit', gestion.id)">
-                            <HIcon name="PencilSquareIcon" class="h-4 w-4" />
-                            Editar
-                          </Link>
-                        </li>
-                        <li v-if="permisos.puede_activar && !gestion.es_actual">
-                          <button @click="activarGestion(gestion)" class="text-success">
-                            <HIcon name="CheckCircleIcon" class="h-4 w-4" />
-                            Activar
-                          </button>
-                        </li>
-                        <li v-if="permisos.puede_eliminar && !gestion.es_actual">
-                          <button @click="eliminarGestion(gestion)" class="text-error">
-                            <HIcon name="TrashIcon" class="h-4 w-4" />
-                            Eliminar
-                          </button>
-                        </li>
-                      </ul>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center" title="Docentes">
+                            <HIcon name="UserGroupIcon" class="h-4 w-4 mr-1 opacity-60" />
+                            <span class="font-mono text-sm">{{ gestion.docentes_count || 0 }}</span>
+                        </div>
+                        <div class="divider divider-horizontal mx-0"></div>
+                        <div class="flex items-center" title="Programas">
+                            <HIcon name="AcademicCapIcon" class="h-4 w-4 mr-1 opacity-60" />
+                            <span class="font-mono text-sm">{{ gestion.programas_count || 0 }}</span>
+                        </div>
                     </div>
                   </td>
+                  <td class="whitespace-nowrap">
+                      <!-- Botón para Activar (prominente) -->
+                      <button 
+                          v-if="permisos.puede_activar && !gestion.es_actual" 
+                          @click="activarGestion(gestion)" 
+                          class="btn btn-sm btn-success btn-outline"
+                          title="Convertir en gestión actual">
+                          <HIcon name="CheckCircleIcon" class="h-4 w-4" />
+                          Activar
+                      </button>
+
+                      <!-- Menú de otras acciones -->
+                      <div class="dropdown dropdown-end">
+                          <div tabindex="0" role="button" class="btn btn-ghost btn-sm" :class="{'btn-disabled': !permisos.puede_ver_detalles && !permisos.puede_editar && !permisos.puede_eliminar}">
+                              <HIcon name="EllipsisVerticalIcon" class="h-5 w-5" />
+                          </div>
+                          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                              <li v-if="permisos.puede_ver_detalles">
+                                  <Link :href="route('gestiones.show', gestion.id)">
+                                      <HIcon name="EyeIcon" class="h-4 w-4" />
+                                      Ver Detalles
+                                  </Link>
+                              </li>
+                              <li v-if="permisos.puede_editar">
+                                  <Link :href="route('gestiones.edit', gestion.id)">
+                                      <HIcon name="PencilSquareIcon" class="h-4 w-4" />
+                                      Editar
+                                  </Link>
+                              </li>
+                              <li v-if="permisos.puede_eliminar">
+                                  <button 
+                                      @click="eliminarGestion(gestion)" 
+                                      class="text-error w-full"
+                                      :disabled="gestion.es_actual"
+                                      title="No se puede eliminar la gestión actual">
+                                      <HIcon name="TrashIcon" class="h-4 w-4" />
+                                      Eliminar
+                                  </button>
+                              </li>
+                          </ul>
+                      </div>
+                  </td>
+                </tr>
+                <tr v-if="gestiones.data.length === 0">
+                    <td colspan="5" class="text-center py-8">
+                        <div class="text-lg">No se encontraron gestiones.</div>
+                        <div class="text-base-content/60">Intenta ajustar los filtros o crea una nueva.</div>
+                    </td>
                 </tr>
               </tbody>
             </table>

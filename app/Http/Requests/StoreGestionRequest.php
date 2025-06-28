@@ -49,7 +49,7 @@ class StoreGestionRequest extends FormRequest
             'fecha_inicio' => [
                 'required',
                 'date',
-                'after_or_equal:' . now()->subYear()->format('Y-m-d'), // No más de 1 año atrás
+                'after_or_equal:' . now()->subYears(2)->format('Y-m-d'), // No más de 2 años atrás
             ],
             
             // Fecha de fin debe ser posterior al inicio
@@ -57,7 +57,7 @@ class StoreGestionRequest extends FormRequest
                 'required',
                 'date',
                 'after:fecha_inicio',
-                'before_or_equal:' . now()->addYears(2)->format('Y-m-d'), // No más de 2 años adelante
+                'before_or_equal:' . now()->addYears(5)->format('Y-m-d'), // No más de 5 años adelante
             ],
             
             // Estado de la gestión
