@@ -15,7 +15,7 @@ const form = useForm({
     descripcion: '',
     fecha_inicio: '',
     fecha_fin: '',
-    estado: '',
+    estado: 'activo',
     es_actual: false,
     nombre: '', // se rellena automáticamente
 });
@@ -37,7 +37,7 @@ const submit = () => {
             Crear Nueva Gestión Académica
         </template>
 
-        <div class="card bg-base-100 shadow-xl md:card-bordered max-w-2xl mx-auto">
+        <form @submit.prevent="submit" class="card bg-base-100 shadow-xl md:card-bordered max-w-2xl mx-auto">
             <div class="card-body space-y-6">
                 <!-- Bloque Básicos -->
                 <h2 class="card-title">Datos básicos</h2>
@@ -98,6 +98,7 @@ const submit = () => {
                             <option disabled value="">Seleccione un estado</option>
                             <option v-for="e in props.estadosDisponibles" :key="e.value" :value="e.value">{{ e.label }}</option>
                         </select>
+                        <p v-if="form.errors.estado" class="validator-hint text-error">{{ form.errors.estado }}</p>
                     </label>
 
                     <div class="form-control mt-6">
@@ -117,6 +118,6 @@ const submit = () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </form>
     </AppLayout>
 </template> 

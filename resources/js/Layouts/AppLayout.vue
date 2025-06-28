@@ -140,7 +140,9 @@ import {
   ComputerDesktopIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  HeartIcon,
+  SparklesIcon
 } from '@heroicons/vue/24/outline';
 
 
@@ -165,7 +167,16 @@ function goSearch() {
 const themes = [
     { name: 'light', label: 'Jóvenes (Día)', icon: SunIcon },
     { name: 'cupcake', label: 'Niños', icon: SunIcon },
-    { name: 'dracula', label: 'Adultos (Noche)', icon: MoonIcon }
+    { name: 'dracula', label: 'Adultos (Noche)', icon: MoonIcon },
+    // Temas adicionales
+    { name: 'forest', label: 'Bosque', icon: SunIcon },
+    { name: 'cyberpunk', label: 'Ciberpunk', icon: ComputerDesktopIcon },
+    { name: 'valentine', label: 'San Valentín', icon: HeartIcon },
+    { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
+    { name: 'retro', label: 'Retro', icon: SunIcon },
+    { name: 'caramellatte', label: 'Caramelo', icon: SunIcon },
+    { name: 'sunset', label: 'Atardecer', icon: SunIcon },
+    { name: 'aqua', label: 'Aqua', icon: SunIcon },
 ];
 const activeTheme = ref(localStorage.getItem('theme') || 'light');
 

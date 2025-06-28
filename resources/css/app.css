@@ -10,5 +10,5 @@
 /* Configuración DaisyUI 5 */
 @plugin "daisyui" {
   /* cupcake será el tema por defecto y dracula el dark */
-  themes: cupcake --default, dracula --prefersdark, light, corporate;
+  themes: cupcake --default, dracula --prefersdark, light, corporate, forest, cyberpunk, valentine, synthwave, retro, caramellatte, sunset, aqua;
 }
