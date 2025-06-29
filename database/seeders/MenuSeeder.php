@@ -16,75 +16,83 @@ class MenuSeeder extends Seeder
         // Limpiar la tabla de menús para evitar duplicados
         Menu::query()->delete();
 
-        // Crear algunos menús de ejemplo
+        // Crear menús mapeados a sus permisos correspondientes
         $menus = [
             [
                 'titulo' => 'Dashboard',
                 'ruta' => 'dashboard',
                 'icono' => 'heroicons-outline:home',
-                'roles' => ['administrador', 'director', 'secretario'],
+                'permiso' => 'ver_dashboard',
+                'orden' => 1,
             ],
             [
                 'titulo' => 'Gestiones',
                 'ruta' => 'gestiones.index',
                 'icono' => 'heroicons-outline:calendar',
-                'roles' => ['administrador', 'director'],
+                'permiso' => 'ver_gestiones',
+                'orden' => 2,
             ],
             [
                 'titulo' => 'Carga Excel',
                 'ruta' => 'excel.index',
                 'icono' => 'heroicons-outline:upload',
-                'roles' => ['administrador', 'secretario'],
+                'permiso' => 'cargar_excel',
+                'orden' => 3,
             ],
             [
                 'titulo' => 'Docentes',
                 'ruta' => 'docentes.index',
                 'icono' => 'heroicons-outline:users',
-                'roles' => ['administrador', 'director', 'secretario'],
+                'permiso' => 'ver_docentes',
+                'orden' => 4,
             ],
             [
                 'titulo' => 'Programas',
                 'ruta' => 'programas.index',
                 'icono' => 'heroicons-outline:collection',
-                'roles' => ['administrador', 'director', 'secretario'],
+                'permiso' => 'ver_programas',
+                'orden' => 5,
             ],
             [
                 'titulo' => 'Certificaciones',
                 'ruta' => 'certificaciones.index',
                 'icono' => 'heroicons-outline:academic-cap',
-                'roles' => ['administrador', 'director', 'secretario'],
+                'permiso' => 'ver_certificaciones',
+                'orden' => 6,
             ],
             [
                 'titulo' => 'Tesis',
                 'ruta' => 'tesis.index',
                 'icono' => 'heroicons-outline:book-open',
-                'roles' => ['administrador', 'director', 'secretario'],
+                'permiso' => 'ver_tesis',
+                'orden' => 7,
             ],
             [
                 'titulo' => 'Usuarios',
                 'ruta' => 'users.index',
                 'icono' => 'heroicons-outline:user-group',
-                'roles' => ['administrador'],
+                'permiso' => 'ver_usuarios',
+                'orden' => 8,
+            ],
+            [
+                'titulo' => 'Reportes',
+                'ruta' => 'reportes.index',
+                'icono' => 'heroicons-outline:chart-bar',
+                'permiso' => 'ver_reportes',
+                'orden' => 9,
             ],
         ];
 
         foreach ($menus as $item) {
-            $menu = Menu::create([
+            Menu::create([
                 'titulo' => $item['titulo'],
                 'ruta' => $item['ruta'],
-                'icono' => $item['icono'],
-                'orden' => 0,
+                'icono' => $item['icono'] ?? null,
+                'permiso' => $item['permiso'],
+                'orden' => $item['orden'],
+                'activo' => true
             ]);
         }
-
-        // Menú de Reportes
-        Menu::create([
-            'titulo' => 'Reportes',
-            'ruta' => 'reportes.index',
-            'orden' => 6,
-            'permiso' => 'ver_reportes',
-            'activo' => true
-        ]);
 
         // El acceso se controla mediante el campo 'permiso' y los roles de Spatie,
         // por lo que no es necesario asignar roles directamente al menú aquí.

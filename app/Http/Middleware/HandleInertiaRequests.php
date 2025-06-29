@@ -76,46 +76,20 @@ class HandleInertiaRequests extends Middleware
                 },
             ],
             
-            // Menú dinámico filtrado por roles
+            // Menú dinámico filtrado por permisos (simple y optimizado)
             'menu' => function () use ($request) {
                 if (!$request->user()) {
                     return [];
                 }
 
-                $user = $request->user();
-                $permissions = $user->getAllPermissions()->pluck('name');
-
-                // Cargar hijos filtrando por permisos
-                $menu = Menu::with(['children' => function ($query) use ($permissions) {
-                    $query->where(function ($q) use ($permissions) {
-                        $q->whereNull('permiso')
-                          ->orWhereIn('permiso', $permissions);
-                    })->orderBy('orden');
-                }])
-                ->whereNull('parent_id')
-                ->orderBy('orden')
-                ->get();
-
-                // Filtrar el menú final
-                return $menu->filter(function ($item) use ($user) {
-                    // Ocultar si el usuario no tiene permiso para el item padre
-                    if ($item->permiso && !$user->can($item->permiso)) {
-                        return false;
-                    }
-
-                    // Si el item tiene hijos, ya están filtrados. Mostrar el padre.
-                    if ($item->children->isNotEmpty()) {
-                        return true;
-                    }
-
-                    // Si no tiene hijos, es un enlace directo. Mostrarlo solo si tiene ruta y permiso.
-                    if ($item->ruta) {
-                         return !$item->permiso || $user->can($item->permiso);
-                    }
-                    
-                    // Ocultar si es un dropdown vacío sin ruta
-                    return false;
-                })->values();
+                return Menu::whereNull('parent_id')
+                    ->orderBy('orden')
+                    ->get()
+                    ->filter(function ($item) use ($request) {
+                        // Solo mostrar si el usuario tiene el permiso o si no requiere permiso
+                        return !$item->permiso || $request->user()->can($item->permiso);
+                    })
+                    ->values();
             },
             
             'visitas_pagina' => $request->attributes->get('visitas_pagina'),
