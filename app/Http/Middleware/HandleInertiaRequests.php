@@ -81,17 +81,45 @@ class HandleInertiaRequests extends Middleware
                 if (!$request->user()) {
                     return [];
                 }
-                $rolesIds = $request->user()->roles->pluck('id')->toArray();
-                return Menu::with(['children' => function ($q) {
-                        $q->orderBy('orden');
-                    }])
-                    ->whereNull('parent_id')
-                    ->forRoles($rolesIds)
-                    ->orderBy('orden')
-                    ->get();
+
+                $user = $request->user();
+                $permissions = $user->getAllPermissions()->pluck('name');
+
+                // Cargar hijos filtrando por permisos
+                $menu = Menu::with(['children' => function ($query) use ($permissions) {
+                    $query->where(function ($q) use ($permissions) {
+                        $q->whereNull('permiso')
+                          ->orWhereIn('permiso', $permissions);
+                    })->orderBy('orden');
+                }])
+                ->whereNull('parent_id')
+                ->orderBy('orden')
+                ->get();
+
+                // Filtrar el menú final
+                return $menu->filter(function ($item) use ($user) {
+                    // Ocultar si el usuario no tiene permiso para el item padre
+                    if ($item->permiso && !$user->can($item->permiso)) {
+                        return false;
+                    }
+
+                    // Si el item tiene hijos, ya están filtrados. Mostrar el padre.
+                    if ($item->children->isNotEmpty()) {
+                        return true;
+                    }
+
+                    // Si no tiene hijos, es un enlace directo. Mostrarlo solo si tiene ruta y permiso.
+                    if ($item->ruta) {
+                         return !$item->permiso || $user->can($item->permiso);
+                    }
+                    
+                    // Ocultar si es un dropdown vacío sin ruta
+                    return false;
+                })->values();
             },
             
             'visitas_pagina' => $request->attributes->get('visitas_pagina'),
         ];
     }
 }
+

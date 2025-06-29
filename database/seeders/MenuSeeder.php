@@ -75,13 +75,18 @@ class MenuSeeder extends Seeder
                 'icono' => $item['icono'],
                 'orden' => 0,
             ]);
-
-            foreach ($item['roles'] as $nombreRol) {
-                $role = Role::where('name', $nombreRol)->first();
-                if ($role) {
-                    $menu->roles()->attach($role->id);
-                }
-            }
         }
+
+        // Menú de Reportes
+        Menu::create([
+            'titulo' => 'Reportes',
+            'ruta' => 'reportes.index',
+            'orden' => 6,
+            'permiso' => 'ver_reportes',
+            'activo' => true
+        ]);
+
+        // El acceso se controla mediante el campo 'permiso' y los roles de Spatie,
+        // por lo que no es necesario asignar roles directamente al menú aquí.
     }
 } 

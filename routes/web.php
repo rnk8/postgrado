@@ -102,6 +102,24 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/excel/{carga}', [App\Http\Controllers\ExcelController::class, 'destroy'])->name('excel.destroy');
     Route::get('/excel/plantilla/descargar', [App\Http\Controllers\ExcelController::class, 'descargarPlantilla'])->name('excel.plantilla');
     
+    // Estadísticas en tiempo real
+    Route::get('/stats/dashboard', function () {
+        // TODO: Implementar estadísticas del dashboard
+    });
+
+    // Menú dinámico
+    Route::get('/menu', [\App\Http\Controllers\MenuController::class, 'index']);
+});
+
+// Rutas de Reportes
+Route::middleware(['auth', 'can:ver_reportes'])->prefix('reportes')->name('reportes.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ReportController::class, 'index'])->name('index');
+    Route::get('/informe-anual', [App\Http\Controllers\ReportController::class, 'informeAnual'])->name('informeAnual');
+    Route::get('/resumen-programas', [App\Http\Controllers\ReportController::class, 'resumenProgramas'])->name('resumenProgramas');
+    Route::get('/estado-alumnos', [App\Http\Controllers\ReportController::class, 'estadoAlumnos'])->name('estadoAlumnos');
+    Route::get('/reporte-docentes', [App\Http\Controllers\ReportController::class, 'reporteDocentes'])->name('reporteDocentes');
+    Route::get('/resumen-defensas', [App\Http\Controllers\ReportController::class, 'resumenDefensas'])->name('resumenDefensas');
+    Route::get('/data', [App\Http\Controllers\ReportController::class, 'getData'])->name('data');
 });
 
 /*
