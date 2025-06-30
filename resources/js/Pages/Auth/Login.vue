@@ -9,6 +9,10 @@
       </div>
       
       <div class="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+        <div class="flex justify-center pt-6">
+          <!-- Logo de la aplicación -->
+          <img :src="logoUrl" alt="Logo" class="h-32 w-32" />
+        </div>
         <form @submit.prevent="submit" class="card-body">
           <div class="form-control">
             <label class="label">
@@ -92,6 +96,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import HIcon from '@/Components/HIcon.vue';
+import logoUrl from '../../../images/favicon.svg';
 
 const form = useForm({
   email: '',

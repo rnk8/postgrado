@@ -1,5 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
+import.meta.glob('../images/**');
 
 // Imports de Vue y Inertia
 import { createApp, h } from 'vue';

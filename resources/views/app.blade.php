@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#1f2937">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ Vite::asset('resources/images/favicon.svg') }}">
     
     <!-- Título dinámico de la página -->
     <title inertia>{{ config('app.name', 'Sistema Postgrado UAGRM') }}</title>
