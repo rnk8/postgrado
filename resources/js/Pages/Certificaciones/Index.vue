@@ -11,6 +11,7 @@ const props = defineProps({
   programas: Array,
   filters: Object,
   estadosDisponibles: Object,
+  permisos: Object,
 });
 
 const page = usePage();
@@ -50,7 +51,14 @@ watch(filters, throttle(() => {
                 <option v-for="programa in programas" :key="programa.id" :value="programa.id">{{ programa.nombre }}</option>
             </select>
         </div>
-        <Link :href="route('certificaciones.create')" class="btn btn-primary">
+        <button @click="clearFilters" class="btn btn-ghost">
+          Limpiar
+        </button>
+        <Link
+          v-if="permisos.puede_crear"
+          :href="route('certificaciones.create')"
+          class="btn btn-primary"
+        >
           <HIcon name="PlusIcon" class="h-5 w-5" />
           Nueva Certificación
         </Link>
@@ -97,10 +105,35 @@ watch(filters, throttle(() => {
               </td>
               <td class="text-right">
                 <div class="join">
-                    <Link :href="route('certificaciones.show', cert.id)" class="btn btn-ghost btn-sm join-item">Ver</Link>
-                    <Link :href="route('certificaciones.edit', cert.id)" class="btn btn-ghost btn-sm join-item">Editar</Link>
-                    <Link v-if="cert.estado === 'pendiente'" :href="route('certificaciones.emitir', cert.id)" method="put" as="button" class="btn btn-ghost btn-sm join-item text-success">Emitir</Link>
-                    <Link :href="route('certificaciones.destroy', cert.id)" method="delete" as="button" class="btn btn-ghost btn-sm join-item text-red-500" :onBefore="() => confirm('¿Seguro que quieres eliminar esta certificación?')">Eliminar</Link>
+                  <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="btn btn-ghost btn-sm join-item">Acciones</label>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                      <li>
+                        <Link :href="route('certificaciones.show', cert.id)">
+                          <HIcon name="EyeIcon" class="h-4 w-4" />
+                          Ver Detalles
+                        </Link>
+                      </li>
+                      <li v-if="permisos.puede_editar">
+                        <Link :href="route('certificaciones.edit', cert.id)">
+                          <HIcon name="PencilSquareIcon" class="h-4 w-4" />
+                          Editar
+                        </Link>
+                      </li>
+                      <li v-if="permisos.puede_emitir && cert.estado === 'pendiente'">
+                        <Link :href="route('certificaciones.emitir', cert.id)" method="put" as="button" class="text-success">
+                          <HIcon name="CheckCircleIcon" class="h-4 w-4" />
+                          Emitir
+                        </Link>
+                      </li>
+                      <li v-if="permisos.puede_eliminar">
+                        <button @click="eliminarCertificacion(cert)" class="text-error">
+                          <HIcon name="TrashIcon" class="h-4 w-4" />
+                          Eliminar
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </td>
             </tr>

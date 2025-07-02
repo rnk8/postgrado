@@ -79,6 +79,7 @@ class GestionController extends BaseController
                 'puede_editar' => $request->user()->can('editar_gestiones'),
                 'puede_eliminar' => $request->user()->can('eliminar_gestiones'),
                 'puede_activar' => $request->user()->can('activar_gestiones'),
+                'puede_ver_detalles' => $request->user()->can('ver_gestiones'),
             ]
         ]);
     }
@@ -194,6 +195,7 @@ class GestionController extends BaseController
                 'puede_editar' => $request->user()->can('editar_gestiones'),
                 'puede_eliminar' => $request->user()->can('eliminar_gestiones'),
                 'puede_activar' => $request->user()->can('activar_gestiones'),
+                'puede_ver_detalles' => $request->user()->can('ver_gestiones'),
             ]
         ]);
     }

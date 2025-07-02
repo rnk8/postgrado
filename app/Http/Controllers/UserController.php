@@ -31,6 +31,7 @@ class UserController extends BaseController
                 'puede_editar_roles' => $request->user()->can('editar_roles_usuario'),
                 'puede_crear' => $request->user()->can('crear_usuarios'),
                 'puede_eliminar' => $request->user()->can('eliminar_usuarios'),
+                'puede_editar' => $request->user()->can('editar_usuarios'),
             ]
         ]);
     }

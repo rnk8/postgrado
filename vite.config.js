@@ -26,6 +26,13 @@ export default defineConfig({
         tailwindcss(),
         // Plugin de Ziggy para Vite
         ziggyPlugin(),
-        svgLoader(),
+        svgLoader({
+            defaultImport: 'url', // Trata los SVG como URL por defecto
+        }),
     ],
+    resolve: {
+        alias: {
+            '@': '/resources/js',
+        },
+    },
 });

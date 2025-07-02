@@ -18,13 +18,16 @@ import {
   ArrowPathIcon,
   CloudArrowUpIcon,
   DocumentArrowDownIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  TrashIcon
 } from '@heroicons/vue/24/outline';
 import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
   carga: Object,
   datosAcademicos: Object,
+  permisos: Object,
 });
 
 const resumen = props.carga.resumen_procesamiento || {};
@@ -101,6 +104,20 @@ const getEstadoInfo = (estado) => {
   return estados[estado] || estados['pendiente'];
 };
 
+const reprocesarCarga = () => {
+    if (confirm('¿Está seguro de que quiere volver a procesar este archivo? Los datos existentes de esta carga serán eliminados y reemplazados.')) {
+        router.post(route('excel.procesar', props.carga.id), {}, { preserveScroll: true });
+    }
+}
+
+const eliminarCarga = () => {
+    if (confirm('¿Eliminar esta carga y todos sus datos importados? Esta acción no se puede deshacer.')) {
+        router.delete(route('excel.destroy', props.carga.id), {
+            onSuccess: () => router.visit(route('excel.index')),
+        });
+    }
+}
+
 </script>
 
 <template>
@@ -129,9 +146,17 @@ const getEstadoInfo = (estado) => {
           </ul>
         </div>
         <div class="flex gap-2">
+          <button v-if="permisos.puede_reprocesar" @click="reprocesarCarga" class="btn btn-outline btn-warning gap-2">
+            <ArrowPathIcon class="h-4 w-4" />
+            Reprocesar
+          </button>
+          <button v-if="permisos.puede_eliminar" @click="eliminarCarga" class="btn btn-outline btn-error gap-2">
+            <TrashIcon class="h-4 w-4" />
+            Eliminar
+          </button>
           <Link :href="route('excel.index')" class="btn btn-outline gap-2">
             <ArrowLeftIcon class="h-4 w-4" />
-            Volver al Historial
+            Volver
           </Link>
         </div>
       </div>

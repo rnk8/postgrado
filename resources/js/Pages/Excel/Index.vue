@@ -206,7 +206,7 @@ const descargarPlantilla = () => {
 </div>
 
       <!-- Card de Carga de Archivo -->
-      <div class="card bg-gradient-to-br from-base-100 to-base-200 shadow-2xl border border-base-300">
+      <div v-if="permisos.puede_cargar" class="card bg-gradient-to-br from-base-100 to-base-200 shadow-2xl border border-base-300">
         <div class="card-body">
           <div class="flex items-center justify-between mb-6">
             <h2 class="card-title text-2xl">
@@ -437,33 +437,29 @@ const descargarPlantilla = () => {
                       </div>
                     </div>
                   </td>
-                  <td>
-                    <div class="dropdown dropdown-end">
-                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-                        <div class="w-1 h-1 bg-current rounded-full"></div>
-                        <div class="w-1 h-1 bg-current rounded-full"></div>
-                        <div class="w-1 h-1 bg-current rounded-full"></div>
-                      </div>
-                      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300">
-                        <li>
-                          <Link :href="route('excel.show', carga.id)" class="gap-2">
-                            <EyeIcon class="h-4 w-4" />
-                            Ver Detalles
-                          </Link>
-                        </li>
-                        <li v-if="carga.estado === 'pendiente' && permisos.puede_cargar">
-                          <button @click="procesarCarga(carga.id)" class="gap-2 text-info">
-                            <PlayIcon class="h-4 w-4" />
-                            Procesar Ahora
-                          </button>
-                        </li>
-                        <li v-if="permisos.puede_eliminar">
-                          <button @click="deleteCarga(carga.id)" class="gap-2 text-error">
-                            <TrashIcon class="h-4 w-4" />
-                            Eliminar
-                          </button>
-                        </li>
-                      </ul>
+                  <td class="text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <Link :href="route('excel.show', carga.id)" class="btn btn-sm btn-ghost">
+                        <EyeIcon class="h-4 w-4" /> Ver
+                      </Link>
+
+                      <button
+                        v-if="permisos.puede_reprocesar && carga.estado === 'pendiente'"
+                        @click="procesarCarga(carga.id)"
+                        class="btn btn-sm btn-ghost text-primary"
+                        title="Procesar este archivo"
+                      >
+                        <PlayIcon class="h-4 w-4" /> Procesar
+                      </button>
+
+                      <button 
+                        v-if="permisos.puede_eliminar"
+                        @click="deleteCarga(carga.id)" 
+                        class="btn btn-sm btn-ghost text-error"
+                        title="Eliminar esta carga y sus datos"
+                      >
+                        <TrashIcon class="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

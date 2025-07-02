@@ -172,7 +172,7 @@ function formatDate(date) {
                                     <td>
                                         <div class="flex gap-2">
                                             <button
-                                                v-if="permisos.puede_editar_roles"
+                                                v-if="permisos.puede_editar_roles || permisos.puede_editar"
                                                 @click="openEditModal(user)"
                                                 class="btn btn-ghost btn-sm"
                                             >
@@ -220,14 +220,14 @@ function formatDate(date) {
 
                     <div class="form-control mb-4">
                         <label class="label"><span class="label-text">Nombre</span></label>
-                        <input v-model="editedName" type="text" class="input input-bordered w-full" />
+                        <input v-model="editedName" type="text" class="input input-bordered w-full" :disabled="!permisos.puede_editar" />
                     </div>
                     <div class="form-control mb-4">
                         <label class="label"><span class="label-text">Email</span></label>
-                        <input v-model="editedEmail" type="email" class="input input-bordered w-full" />
+                        <input v-model="editedEmail" type="email" class="input input-bordered w-full" :disabled="!permisos.puede_editar" />
                     </div>
 
-                    <div class="form-control">
+                    <div class="form-control" :class="{ 'opacity-50': !permisos.puede_editar_roles }">
                         <label class="label">
                             <span class="label-text">Roles disponibles</span>
                         </label>
@@ -242,9 +242,13 @@ function formatDate(date) {
                                     type="checkbox"
                                     :value="role"
                                     class="checkbox checkbox-primary"
+                                    :disabled="!permisos.puede_editar_roles"
                                 />
                                 <span class="label-text capitalize">{{ role }}</span>
                             </label>
+                        </div>
+                        <div v-if="!permisos.puede_editar_roles" class="text-xs text-base-content/60 mt-2">
+                            No tiene permiso para modificar roles.
                         </div>
                     </div>
                 </div>

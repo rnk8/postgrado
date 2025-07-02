@@ -171,7 +171,7 @@ class ExcelController extends BaseController
         }
     }
 
-    public function show(CargaExcel $carga)
+    public function show(Request $request, CargaExcel $carga)
     {
         $this->authorize('cargar_excel');
 
@@ -198,6 +198,10 @@ class ExcelController extends BaseController
             'carga' => $carga,
             'datosAcademicos' => $datosAcademicos,
             'estadisticasCarga' => $estadisticasCarga,
+            'permisos' => [
+                'puede_reprocesar' => $request->user()->can('reprocesar_excel'),
+                'puede_eliminar' => $request->user()->can('eliminar_cargas_excel'),
+            ]
         ]);
     }
 
