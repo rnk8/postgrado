@@ -286,18 +286,15 @@ function goSearch() {
 
 // Theme logic
 const themes = [
-    { name: 'light', label: 'Jóvenes', icon: SunIcon },
-    { name: 'cupcake', label: 'Niños', icon: SunIcon },
-    { name: 'dracula', label: 'Adultos', icon: MoonIcon },
+    { name: 'light', label: 'Modo Día', icon: SunIcon },
+    { name: 'dracula', label: 'Modo Noche', icon: MoonIcon },
+    { name: 'cupcake', label: 'Tema Niños (Día)', icon: SparklesIcon },
     // Temas adicionales
-    { name: 'forest', label: 'Bosque', icon: SunIcon },
-    { name: 'cyberpunk', label: 'Ciberpunk', icon: ComputerDesktopIcon },
-    { name: 'valentine', label: 'San Valentín', icon: HeartIcon },
-    { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
-    { name: 'retro', label: 'Retro', icon: SunIcon },
-    { name: 'caramellatte', label: 'Caramelo', icon: SunIcon },
-    { name: 'sunset', label: 'Atardecer (Noche)', icon: SunIcon },
-    { name: 'aqua', label: 'Aqua', icon: SunIcon },
+    { name: 'forest', label: 'Bosque (Noche)', icon: MoonIcon },
+    { name: 'synthwave', label: 'Synthwave (Noche)', icon: SparklesIcon },
+    { name: 'valentine', label: 'San Valentín (Día)', icon: HeartIcon },
+    { name: 'cyberpunk', label: 'Cyberpunk', icon: ComputerDesktopIcon },
+    { name: 'aqua', label: 'Aqua (Día)', icon: SunIcon },
 ];
 const activeTheme = ref(localStorage.getItem('theme') || 'light');
 
@@ -313,10 +310,11 @@ onMounted(() => {
         applyTheme(savedTheme);
     } else {
         const hour = new Date().getHours();
+        // Por defecto, modo noche entre 7pm y 6am
         if (hour >= 19 || hour < 6) {
-            applyTheme('dracula');
+            applyTheme('dracula'); // Cargar Modo Noche por defecto
         } else {
-            applyTheme('light');
+            applyTheme('light'); // Cargar Modo Día por defecto
         }
     }
     // Set initial font size
