@@ -5,6 +5,46 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $codigo
+ * @property string|null $titulo
+ * @property string $nro_registro_est
+ * @property string $nombre_est
+ * @property \Illuminate\Support\Carbon|null $fecha_defensa_tfg
+ * @property numeric|null $nota_defensa_tfg
+ * @property string $estado
+ * @property int|null $tutor_id
+ * @property int $programa_id
+ * @property int $gestion_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Gestion $gestion
+ * @property-read \App\Models\Programa $programa
+ * @property-read \App\Models\Docente|null $tutor
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis aprobada()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis defendida()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis gestionActual()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereCodigo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereEstado($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereFechaDefensaTfg($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereGestionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereNombreEst($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereNotaDefensaTfg($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereNroRegistroEst($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereProgramaId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereTitulo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereTutorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tesis whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Tesis extends Model
 {
     use HasFactory;

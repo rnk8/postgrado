@@ -5,6 +5,48 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $numero
+ * @property string $nro_registro_est
+ * @property string $nombre_est
+ * @property string $genero_est
+ * @property numeric|null $nota
+ * @property numeric|null $nota_defensa_tfg
+ * @property \Illuminate\Support\Carbon|null $fecha_defensa_tfg
+ * @property \Illuminate\Support\Carbon|null $fecha_emision
+ * @property numeric|null $promedio
+ * @property string $estado
+ * @property int $programa_id
+ * @property int $gestion_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Gestion $gestion
+ * @property-read \App\Models\Programa $programa
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion emitido()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion gestionActual()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereEstado($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereFechaDefensaTfg($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereFechaEmision($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereGeneroEst($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereGestionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereNombreEst($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereNota($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereNotaDefensaTfg($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereNroRegistroEst($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereNumero($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereProgramaId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion wherePromedio($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Certificacion whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Certificacion extends Model
 {
     use HasFactory;

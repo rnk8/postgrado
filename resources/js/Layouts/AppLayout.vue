@@ -286,9 +286,9 @@ function goSearch() {
 
 // Theme logic
 const themes = [
-    { name: 'light', label: 'Jóvenes (Día)', icon: SunIcon },
+    { name: 'light', label: 'Jóvenes', icon: SunIcon },
     { name: 'cupcake', label: 'Niños', icon: SunIcon },
-    { name: 'dracula', label: 'Adultos (Noche)', icon: MoonIcon },
+    { name: 'dracula', label: 'Adultos', icon: MoonIcon },
     // Temas adicionales
     { name: 'forest', label: 'Bosque', icon: SunIcon },
     { name: 'cyberpunk', label: 'Ciberpunk', icon: ComputerDesktopIcon },
@@ -296,7 +296,7 @@ const themes = [
     { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
     { name: 'retro', label: 'Retro', icon: SunIcon },
     { name: 'caramellatte', label: 'Caramelo', icon: SunIcon },
-    { name: 'sunset', label: 'Atardecer', icon: SunIcon },
+    { name: 'sunset', label: 'Atardecer (Noche)', icon: SunIcon },
     { name: 'aqua', label: 'Aqua', icon: SunIcon },
 ];
 const activeTheme = ref(localStorage.getItem('theme') || 'light');

@@ -5,6 +5,46 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * 
+ *
+ * @property int $id
+ * @property string $nombre
+ * @property string|null $descripcion
+ * @property \Illuminate\Support\Carbon $fecha_inicio
+ * @property \Illuminate\Support\Carbon $fecha_fin
+ * @property string $estado
+ * @property bool $es_actual
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CargaExcel> $cargasExcel
+ * @property-read int|null $cargas_excel_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Certificacion> $certificaciones
+ * @property-read int|null $certificaciones_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DatoAcademico> $datosAcademicos
+ * @property-read int|null $datos_academicos_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Docente> $docentes
+ * @property-read int|null $docentes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Programa> $programas
+ * @property-read int|null $programas_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tesis> $tesis
+ * @property-read int|null $tesis_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion activo()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion actual()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereDescripcion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereEsActual($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereEstado($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereFechaFin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereFechaInicio($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereNombre($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Gestion whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Gestion extends Model
 {
     use HasFactory;

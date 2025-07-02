@@ -179,12 +179,25 @@ class ExcelController extends BaseController
 
         // Obtener datos académicos relacionados si existen
         $datosAcademicos = DatoAcademico::where('carga_excel_id', $carga->id)
-            ->with(['programa', 'docente'])
+            ->with(['gestion'])
             ->paginate(20);
+
+        // Estadísticas específicas de esta carga
+        $estadisticasCarga = [
+            'total_estudiantes' => DatoAcademico::where('carga_excel_id', $carga->id)
+                ->distinct('nro_registro_est')->count(),
+            'estudiantes_con_defensa' => DatoAcademico::where('carga_excel_id', $carga->id)
+                ->whereNotNull('fecha_defensa_tfg')->distinct('nro_registro_est')->count(),
+            'programas_diferentes' => DatoAcademico::where('carga_excel_id', $carga->id)
+                ->distinct('cod_carrera')->count(),
+            'docentes_diferentes' => DatoAcademico::where('carga_excel_id', $carga->id)
+                ->whereNotNull('cod_doc')->distinct('cod_doc')->count(),
+        ];
 
         return Inertia::render('Excel/Show', [
             'carga' => $carga,
             'datosAcademicos' => $datosAcademicos,
+            'estadisticasCarga' => $estadisticasCarga,
         ]);
     }
 

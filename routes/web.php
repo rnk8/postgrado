@@ -10,6 +10,7 @@ use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TesisController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DatosAcademicosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -150,3 +151,12 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
 });
 
 Route::get('/busqueda', [SearchController::class, 'index'])->name('busqueda');
+
+// Rutas para datos académicos
+Route::middleware(['auth'])->group(function () {
+    Route::get('/datos-academicos', [DatosAcademicosController::class, 'index'])->name('datos-academicos.index');
+    Route::get('/datos-academicos/{datoAcademico}', [DatosAcademicosController::class, 'show'])->name('datos-academicos.show');
+    Route::get('/estudiante/{nroRegistro}', [DatosAcademicosController::class, 'estudiante'])->name('estudiante.show');
+});
+
+

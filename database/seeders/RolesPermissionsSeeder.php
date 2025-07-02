@@ -70,10 +70,14 @@ class RolesPermissionsSeeder extends Seeder
             'generar_reportes',
             'exportar_reportes',
             
-            // Nuevo módulo
+            // Dashboard
             'ver_dashboard',
             'ver_estadisticas_dashboard',
             'acceder_acciones_rapidas',
+            
+            // Datos Académicos
+            'ver_datos_academicos',
+            'exportar_datos_academicos',
         ];
 
         foreach ($permissions as $permission) {
@@ -119,6 +123,7 @@ class RolesPermissionsSeeder extends Seeder
             'ver_dashboard',
             'ver_estadisticas_dashboard',
             'acceder_acciones_rapidas',
+            'ver_datos_academicos',
         ];
         $secretarioRole->givePermissionTo($secretarioPermissions);
 

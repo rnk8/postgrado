@@ -14,8 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Configuración del middleware de Inertia para manejo de requests SPA
         $middleware->web(append: [
-            HandleInertiaRequests::class,
             \App\Http\Middleware\TrackPageVisits::class,
+            HandleInertiaRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
