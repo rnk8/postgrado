@@ -79,13 +79,15 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('programas', App\Http\Controllers\ProgramaController::class)->parameters(['programas'=>'programa']);
     
     // Certificaciones
-    Route::resource('certificaciones', App\Http\Controllers\CertificacionController::class);
+    Route::resource('certificaciones', App\Http\Controllers\CertificacionController::class)
+        ->parameters(['certificaciones' => 'certificacion']);
     Route::put('/certificaciones/{certificacion}/emitir', [App\Http\Controllers\CertificacionController::class, 'emitir'])
         ->name('certificaciones.emitir')
         ->middleware('can:emitir_certificaciones');
     
     // Tesis
-    Route::resource('tesis', TesisController::class);
+    Route::resource('tesis', TesisController::class)
+        ->parameters(['tesis' => 'tesis']);
     Route::put('tesis/{tesis}/aprobar', [TesisController::class, 'aprobar'])->name('tesis.aprobar');
     
     // Gestión de Usuarios y Roles

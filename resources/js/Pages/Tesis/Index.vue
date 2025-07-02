@@ -1,4 +1,5 @@
 <script setup>
+/* global route */
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
@@ -45,7 +46,7 @@ function clearFilters() {
 
 function aprobarTesis(tesis) {
   if (confirm(`¿Está seguro de aprobar la tesis "${tesis.titulo}"?`)) {
-    router.post(route('tesis.aprobar', tesis.id));
+    router.put(route('tesis.aprobar', tesis.id));
   }
 }
 
