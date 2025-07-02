@@ -48,8 +48,25 @@
                     <SunIcon class="h-5 w-5"/>
                     <ChevronDownIcon class="h-4 w-4"/>
                 </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box w-52">
-                    <li v-for="theme in themes" :key="theme.name">
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box w-64">
+                    <!-- Temas Principales -->
+                    <li class="menu-title">
+                        <span class="text-xs font-semibold text-base-content/70">TEMAS PRINCIPALES</span>
+                    </li>
+                    <li v-for="theme in mainThemes" :key="theme.name">
+                        <a @click.prevent="applyTheme(theme.name)" :class="{ 'active': activeTheme === theme.name }">
+                            <component :is="theme.icon" class="h-4 w-4"/> {{ theme.label }}
+                        </a>
+                    </li>
+                    
+                    <!-- Separador -->
+                    <li class="divider my-2"></li>
+                    
+                    <!-- Temas Adicionales -->
+                    <li class="menu-title">
+                        <span class="text-xs font-semibold text-base-content/70">TEMAS ADICIONALES</span>
+                    </li>
+                    <li v-for="theme in additionalThemes" :key="theme.name">
                         <a @click.prevent="applyTheme(theme.name)" :class="{ 'active': activeTheme === theme.name }">
                             <component :is="theme.icon" class="h-4 w-4"/> {{ theme.label }}
                         </a>
@@ -287,12 +304,16 @@ function goSearch() {
 }
 
 // Theme logic
-const themes = [
+const mainThemes = [
     { name: 'light', label: 'Modo Día', icon: SunIcon },
     { name: 'dracula', label: 'Modo Noche', icon: MoonIcon },
+ 
     { name: 'cupcake', label: 'Tema Niños', icon: SparklesIcon },
-    // Temas adicionales
-    { name: 'forest', label: 'Bosque', icon: BeakerIcon },
+    { name: 'forest', label: 'Adultos', icon: BeakerIcon },
+];
+
+const additionalThemes = [
+
     { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
     { name: 'valentine', label: 'San Valentín', icon: HeartIcon },
     { name: 'cyberpunk', label: 'Cyberpunk', icon: ComputerDesktopIcon },
