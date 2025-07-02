@@ -193,10 +193,12 @@ import {
   UserCircleIcon,
   ChevronDownIcon,
   HeartIcon,
-  SparklesIcon
+  SparklesIcon,
+  BeakerIcon,
+  CloudIcon
 } from '@heroicons/vue/24/outline';
 
-
+ 
 const page = usePage();
 
 // Computed properties for Inertia props
@@ -288,13 +290,13 @@ function goSearch() {
 const themes = [
     { name: 'light', label: 'Modo Día', icon: SunIcon },
     { name: 'dracula', label: 'Modo Noche', icon: MoonIcon },
-    { name: 'cupcake', label: 'Tema Niños (Día)', icon: SparklesIcon },
+    { name: 'cupcake', label: 'Tema Niños', icon: SparklesIcon },
     // Temas adicionales
-    { name: 'forest', label: 'Bosque (Noche)', icon: MoonIcon },
-    { name: 'synthwave', label: 'Synthwave (Noche)', icon: SparklesIcon },
-    { name: 'valentine', label: 'San Valentín (Día)', icon: HeartIcon },
+    { name: 'forest', label: 'Bosque', icon: BeakerIcon },
+    { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
+    { name: 'valentine', label: 'San Valentín', icon: HeartIcon },
     { name: 'cyberpunk', label: 'Cyberpunk', icon: ComputerDesktopIcon },
-    { name: 'aqua', label: 'Aqua (Día)', icon: SunIcon },
+    { name: 'aqua', label: 'Aqua', icon: CloudIcon },
 ];
 const activeTheme = ref(localStorage.getItem('theme') || 'light');
 
