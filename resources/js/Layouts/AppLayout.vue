@@ -211,11 +211,11 @@ import {
   ChevronDownIcon,
   HeartIcon,
   SparklesIcon,
-  BeakerIcon,
-  CloudIcon
 } from '@heroicons/vue/24/outline';
+import KidsThemeIcon from '../../images/kids-theme-icon.svg?component';
+import YouthThemeIcon from '../../images/youth-theme-icon.svg?component';
+import AdultsThemeIcon from '../../images/adults-theme-icon.svg?component';
 
- 
 const page = usePage();
 
 // Computed properties for Inertia props
@@ -305,19 +305,19 @@ function goSearch() {
 
 // Theme logic
 const mainThemes = [
-    { name: 'light', label: 'Modo Día', icon: SunIcon },
-    { name: 'dracula', label: 'Modo Noche', icon: MoonIcon },
- 
-    { name: 'cupcake', label: 'Tema Niños', icon: SparklesIcon },
-    { name: 'forest', label: 'Adultos', icon: BeakerIcon },
+
+    { name: 'forest', label: 'Tema Adultos', icon: AdultsThemeIcon },
+    { name: 'aqua', label: 'Tema Jovenes', icon: YouthThemeIcon },
+    { name: 'cupcake', label: 'Tema Niños', icon: KidsThemeIcon },
 ];
 
 const additionalThemes = [
-
+{ name: 'light', label: 'Modo Día', icon: SunIcon },
+{ name: 'dracula', label: 'Modo Noche', icon: MoonIcon },
     { name: 'synthwave', label: 'Synthwave', icon: SparklesIcon },
     { name: 'valentine', label: 'San Valentín', icon: HeartIcon },
     { name: 'cyberpunk', label: 'Cyberpunk', icon: ComputerDesktopIcon },
-    { name: 'aqua', label: 'Aqua', icon: CloudIcon },
+ 
 ];
 const activeTheme = ref(localStorage.getItem('theme') || 'light');
 

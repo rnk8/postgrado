@@ -3,6 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import ziggyPlugin from 'vite-plugin-ziggy';
+import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
     plugins: [
@@ -25,5 +26,6 @@ export default defineConfig({
         tailwindcss(),
         // Plugin de Ziggy para Vite
         ziggyPlugin(),
+        svgLoader(),
     ],
 });

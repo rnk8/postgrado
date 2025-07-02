@@ -94,19 +94,38 @@ class RolesPermissionsSeeder extends Seeder
         // Administrador: todos los permisos
         $adminRole->givePermissionTo(Permission::all());
 
-        // Director: casi todos los permisos excepto gestión de usuarios
-        $directorPermissions = Permission::whereNotIn('name', [
-            'crear_usuarios',
-            'editar_usuarios', 
-            'eliminar_usuarios'
-        ])->get();
-        $directorRole->givePermissionTo($directorPermissions);
-
-        // Secretario: permisos limitados
-        $secretarioPermissions = [
+        // Director: permisos de supervisión y aprobación
+        $directorPermissions = [
+            'ver_usuarios',
             'ver_gestiones',
+            'activar_gestiones',
             'ver_docentes',
-            'crear_docentes', 
+            'ver_programas',
+            'coordinar_programas',
+            'ver_certificaciones',
+            'emitir_certificaciones',
+            'ver_tesis',
+            'aprobar_tesis',
+            'ver_reportes',
+            'generar_reportes',
+            'exportar_reportes',
+            'ver_dashboard',
+            'ver_estadisticas_dashboard',
+            'ver_datos_academicos',
+            'exportar_datos_academicos',
+        ];
+        $directorRole->syncPermissions($directorPermissions);
+
+        // Secretario: permisos de gestión operativa
+        $secretarioPermissions = [
+            'ver_usuarios',
+            'crear_usuarios',
+            'editar_usuarios',
+            'ver_gestiones',
+            'crear_gestiones',
+            'editar_gestiones',
+            'ver_docentes',
+            'crear_docentes',
             'editar_docentes',
             'ver_programas',
             'crear_programas',
@@ -119,13 +138,17 @@ class RolesPermissionsSeeder extends Seeder
             'editar_tesis',
             'cargar_excel',
             'procesar_excel',
+            'eliminar_cargas_excel',
+            'reprocesar_excel',
             'ver_reportes',
+            'generar_reportes',
             'ver_dashboard',
             'ver_estadisticas_dashboard',
             'acceder_acciones_rapidas',
             'ver_datos_academicos',
+            'exportar_datos_academicos',
         ];
-        $secretarioRole->givePermissionTo($secretarioPermissions);
+        $secretarioRole->syncPermissions($secretarioPermissions);
 
         // Crear usuario administrador por defecto
         $admin = User::firstOrCreate([
